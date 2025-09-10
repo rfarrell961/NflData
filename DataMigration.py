@@ -280,7 +280,6 @@ def do_plays():
     df_plays_current["lateral_rush"] = df_plays_current["lateral_rush"] == 1
     df_plays_current["lateral_return"] = df_plays_current["lateral_return"] == 1
     df_plays_current["lateral_recovery"] = df_plays_current["lateral_recovery"] == 1
-    df_plays_current["replay_or_challenge_result"] = df_plays_current["replay_or_challenge_result"] == 1
     df_plays_current["defensive_two_point_conv"] = df_plays_current["defensive_two_point_conv"] == 1
     df_plays_current["defensive_extra_point_conv"] = df_plays_current["defensive_extra_point_conv"] == 1
     df_plays_current["aborted_play"] = df_plays_current["aborted_play"] == 1
