@@ -475,6 +475,9 @@ def do_injuries():
     df_injuries = pd.read_parquet(file)
     df_injuries = df_injuries[["gsis_id", "team", "season", "week", "report_primary_injury", "report_secondary_injury", "report_status", "practice_primary_injury", "practice_secondary_injury", "practice_status"]]
     
+    df_injuries["practice_status"] = df_injuries["practice_status"].str.strip().replace("", np.nan)
+    df_injuries["report_status"] = df_injuries["report_status"].str.strip().replace("", np.nan)
+
     # Get Player IDs
     df_injuries = df_injuries.merge(df_players_db[["player_id_import", "player_id"]], left_on=["gsis_id"], right_on=["player_id_import"], how="left")\
     .drop(columns=["player_id_import", "gsis_id"]).dropna(subset=["player_id"])
