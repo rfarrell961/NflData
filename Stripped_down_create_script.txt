@@ -1,0 +1,311 @@
+CREATE TABLE public.games (
+    game_id integer NOT NULL,
+    regular_season boolean,
+    away_team_id integer NOT NULL,
+    home_team_id integer NOT NULL,
+    week integer NOT NULL,
+    game_date date,
+    start_time time without time zone,
+    stadium text,
+    roof boolean,
+    surface text,
+    weather text,
+    wind integer,
+    season integer,
+    spread_line numeric(4,1),
+    total_line numeric(4,1),
+    division_game boolean,
+    neutral_location boolean,
+    home_coach text,
+    away_coach text,
+    game_id_import text
+);
+
+CREATE TABLE public.injuries (
+    player_id integer NOT NULL,
+    team_id integer NOT NULL,
+    game_id integer NOT NULL,
+    report_primary_injury text,
+    report_secondary_injury text,
+    report_status text,
+    practice_primary_injury text,
+    practice_secondary_injury text,
+    practice_status text
+);
+
+
+CREATE TABLE public.play_participants (
+    play_id bigint NOT NULL,
+    player_id integer NOT NULL,
+    role text
+);
+
+CREATE TABLE public.players (
+    player_id integer NOT NULL,
+    player_id_import character varying(10),
+    first_name text NOT NULL,
+    last_name text NOT NULL,
+    college text,
+    date_of_birth date,
+    draft_number integer,
+    draft_team_id integer,
+    rookie_year integer
+);
+
+CREATE TABLE public.plays (
+    play_id bigint NOT NULL,
+    play_id_import integer,
+    game_id integer NOT NULL,
+    possession_team_id integer,
+    side_of_field_team_id integer,
+    yardline_100 integer,
+    game_seconds_remaining integer,
+    quarter_end boolean,
+    drive integer,
+    scoring_play boolean,
+    down integer,
+    goal_to_go boolean,
+    yards_to_go integer,
+    description text,
+    play_type text,
+    yards_gained integer,
+    shotgun boolean,
+    no_huddle boolean,
+    qb_dropback boolean,
+    qb_scramble boolean,
+    pass_location text,
+    air_yards integer,
+    yards_after_catch integer,
+    run_location text,
+    run_gap text,
+    field_goal_result text,
+    kick_distance integer,
+    extra_point_result text,
+    two_point_conv_result text,
+    home_timeouts_remaining integer,
+    away_timeouts_remaining integer,
+    timeout boolean,
+    timeout_team_id integer,
+    total_home_score integer,
+    total_away_score integer,
+    incomplete_pass boolean,
+    complete_pass boolean,
+    touchback boolean,
+    interception boolean,
+    fumble_forced boolean,
+    fumble_out_of_bounds boolean,
+    penalty boolean,
+    fumble_lost boolean,
+    qb_hit boolean,
+    sack boolean,
+    touchdown boolean,
+    pass_touchdown boolean,
+    rush_touchdown boolean,
+    two_point_attempt boolean,
+    fumble boolean,
+    lateral_reception boolean,
+    lateral_rush boolean,
+    lateral_return boolean,
+    lateral_recovery boolean,
+    passing_yards integer,
+    receiving_yards integer,
+    rushing_yards integer,
+    lateral_receiving_yards integer,
+    lateral_rushing_yards integer,
+    fumble_recovery_1_yards integer,
+    fumble_recovery_2_yards integer,
+    return_team_id integer,
+    return_yards integer,
+    penalty_yards integer,
+    replay_or_challenge_result text,
+    penalty_type text,
+    defensive_two_point_conv boolean,
+    defensive_extra_point_conv boolean,
+    series_result text,
+    time_of_day time without time zone,
+    fixed_drive_result text,
+    aborted_play boolean,
+    out_of_bounds boolean,
+    punt_inside_twenty boolean,
+    punt_in_endzone boolean,
+    punt_out_of_bounds boolean,
+    punt_downed boolean,
+    punt_fair_catch boolean,
+    punt_blocked boolean,
+    kickoff_inside_twenty boolean,
+    kickoff_in_endzone boolean,
+    kickoff_out_of_bounds boolean,
+    kickoff_downed boolean,
+    kickoff_fair_catch boolean,
+    own_kickoff_recovery boolean,
+    own_kickoff_recovery_td boolean
+);
+
+CREATE TABLE public.rosters (
+    player_id integer NOT NULL,
+    team_id integer NOT NULL,
+    height integer,
+    weight integer,
+    game_id integer NOT NULL,
+    jersey_number integer,
+    "position" text
+);
+CREATE TABLE public.teams (
+    team_id integer NOT NULL,
+    abbreviation character varying(3),
+    season integer NOT NULL
+);
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT "Games_pkey" PRIMARY KEY (game_id);
+
+ALTER TABLE public.games
+    ADD CONSTRAINT "Games_surface_check" CHECK ((surface = ANY (ARRAY['a_turf'::text, 'grass'::text, 'sportturf'::text, 'fieldturf'::text, 'matrixturf'::text, 'astroturf'::text]))) NOT VALID;
+
+ALTER TABLE public.play_participants
+    ADD CONSTRAINT "PlayParticipants_role_check" CHECK ((role = ANY (ARRAY['passer'::text, 'rusher'::text, 'receiver'::text, 'touchdown_scorer'::text, 'lateral_receiver'::text, 'lateral_rusher'::text, 'lateral_sack'::text, 'interception'::text, 'lateral_interception'::text, 'punt_returner'::text, 'lateral_punt_returner'::text, 'kickoff_returner'::text, 'lateral_kickoff_returner'::text, 'punter'::text, 'kicker'::text, 'own_kickoff'::text, 'blocked_kick'::text, 'tackle_for_loss_1'::text, 'tackle_for_loss_2'::text, 'qb_hit_1'::text, 'qb_hit_2'::text, 'forced_fumble_player_1'::text, 'forced_fumble_player_2'::text, 'solo_tackle_1'::text, 'solo_tackle_2'::text, 'assist_tackle_1'::text, 'assist_tackle_2'::text, 'assist_tackle_3'::text, 'assist_tackle_4'::text, 'tackle_with_assist_1'::text, 'tackle_with_assist_2'::text, 'pass_defense_1'::text, 'pass_defense_2'::text, 'fumbled_1'::text, 'fumbled_2'::text, 'fumble_recovery_1'::text, 'fumble_recovery_2'::text, 'sack'::text, 'half_sack_1'::text, 'half_sack_2'::text, 'penalty'::text, 'safety'::text]))) NOT VALID;
+
+ALTER TABLE ONLY public.players
+    ADD CONSTRAINT "Players_pkey" PRIMARY KEY (player_id);
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT "Plays_field_goal_result_check" CHECK ((field_goal_result = ANY (ARRAY['made'::text, 'missed'::text, 'blocked'::text]))) NOT VALID;
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT "Plays_fixed_drive_result_check" CHECK ((fixed_drive_result = ANY (ARRAY['Touchdown'::text, 'Turnover'::text, 'Field goal'::text, 'End of half'::text, 'Punt'::text, 'Turnover on downs'::text, 'Missed field goal'::text, 'Opp touchdown'::text, 'Safety'::text]))) NOT VALID;
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT "Plays_pass_location_check" CHECK ((pass_location = ANY (ARRAY['left'::text, 'middle'::text, 'right'::text]))) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_pkey" PRIMARY KEY (play_id);
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT "Plays_play_type_check" CHECK ((play_type = ANY (ARRAY['kickoff'::text, 'run'::text, 'pass'::text, 'extra_point'::text, 'field_goal'::text, 'no_play'::text, 'qb_kneel'::text, 'punt'::text, 'qb_spike'::text]))) NOT VALID;
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT "Plays_run_gap_check" CHECK ((run_gap = ANY (ARRAY['guard'::text, 'end'::text, 'tackle'::text]))) NOT VALID;
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT "Plays_run_location_check" CHECK ((run_location = ANY (ARRAY['middle'::text, 'left'::text, 'right'::text]))) NOT VALID;
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT "Plays_series_result_check" CHECK ((series_result = ANY (ARRAY['First down'::text, 'Touchdown'::text, 'Turnover'::text, 'Field goal'::text, 'QB kneel'::text, 'Punt'::text, 'Turnover on downs'::text, 'Missed field goal'::text, 'End of half'::text, 'Opp touchdown'::text, 'Safety'::text]))) NOT VALID;
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT "Plays_two_point_conv_result_check" CHECK ((two_point_conv_result = ANY (ARRAY['success'::text, 'failure'::text]))) NOT VALID;
+
+ALTER TABLE ONLY public.teams
+    ADD CONSTRAINT "Teams_pkey" PRIMARY KEY (team_id);
+
+ALTER TABLE public.injuries
+    ADD CONSTRAINT injuries_practice_status_check CHECK ((practice_status = ANY (ARRAY['Did Not Participate In Practice'::text, 'Limited Participation in Practice'::text, 'Full Participation in Practice'::text, 'Out (Definitely Will Not Play)'::text, 'Note'::text]))) NOT VALID;
+
+ALTER TABLE public.injuries
+    ADD CONSTRAINT injuries_report_status_check CHECK ((report_status = ANY (ARRAY['Out'::text, 'Questionable'::text, 'Doubtful'::text, 'Probable'::text, 'Note'::text]))) NOT VALID;
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT plays_extra_point_result_check CHECK ((extra_point_result = ANY (ARRAY['good'::text, 'failed'::text, 'aborted'::text, 'blocked'::text]))) NOT VALID;
+
+ALTER TABLE public.plays
+    ADD CONSTRAINT plays_replay_or_challenge_result_check CHECK ((replay_or_challenge_result = ANY (ARRAY['reversed'::text, 'upheld'::text, 'denied'::text]))) NOT VALID;
+
+ALTER TABLE public.rosters
+    ADD CONSTRAINT rosters_position_check CHECK (("position" = ANY (ARRAY['RB'::text, 'CB'::text, 'G'::text, 'T'::text, 'DT'::text, 'DE'::text, 'K'::text, 'SS'::text, 'C'::text, 'FS'::text, 'WR'::text, 'TE'::text, 'FB'::text, 'OLB'::text, 'QB'::text, 'P'::text, 'MLB'::text, 'NT'::text, 'ILB'::text, 'LB'::text, 'DB'::text, 'S'::text, 'LS'::text, 'KR'::text, 'PR'::text, 'OL'::text, 'DL'::text]))) NOT VALID;
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT "Games_away_team_id_fkey" FOREIGN KEY (away_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT "Games_away_team_id_fkey1" FOREIGN KEY (away_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT "Games_home_team_id_fkey" FOREIGN KEY (home_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.games
+    ADD CONSTRAINT "Games_home_team_id_fkey1" FOREIGN KEY (home_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.injuries
+    ADD CONSTRAINT "Injuries_game_id_fkey" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
+
+ALTER TABLE ONLY public.injuries
+    ADD CONSTRAINT "Injuries_game_id_fkey1" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
+
+ALTER TABLE ONLY public.injuries
+    ADD CONSTRAINT "Injuries_player_id_fkey" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
+
+ALTER TABLE ONLY public.injuries
+    ADD CONSTRAINT "Injuries_player_id_fkey1" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
+
+ALTER TABLE ONLY public.injuries
+    ADD CONSTRAINT "Injuries_team_id_fkey" FOREIGN KEY (team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.injuries
+    ADD CONSTRAINT "Injuries_team_id_fkey1" FOREIGN KEY (team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.play_participants
+    ADD CONSTRAINT "PlayParticipants_play_id_fkey" FOREIGN KEY (play_id) REFERENCES public.plays(play_id) NOT VALID;
+
+ALTER TABLE ONLY public.play_participants
+    ADD CONSTRAINT "PlayParticipants_play_id_fkey1" FOREIGN KEY (play_id) REFERENCES public.plays(play_id) NOT VALID;
+
+ALTER TABLE ONLY public.play_participants
+    ADD CONSTRAINT "PlayParticipants_player_id_fkey" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
+
+ALTER TABLE ONLY public.play_participants
+    ADD CONSTRAINT "PlayParticipants_player_id_fkey1" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
+
+ALTER TABLE ONLY public.players
+    ADD CONSTRAINT "Players_draft_team_id_fkey" FOREIGN KEY (draft_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.players
+    ADD CONSTRAINT "Players_draft_team_id_fkey1" FOREIGN KEY (draft_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_game_id_fkey" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_game_id_fkey1" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_possession_team_id_fkey" FOREIGN KEY (possession_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_possession_team_id_fkey1" FOREIGN KEY (possession_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_return_team_id_fkey" FOREIGN KEY (return_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_return_team_id_fkey1" FOREIGN KEY (return_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_side_of_field_team_id_fkey" FOREIGN KEY (side_of_field_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_side_of_field_team_id_fkey1" FOREIGN KEY (side_of_field_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_timeout_team_id_fkey" FOREIGN KEY (timeout_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.plays
+    ADD CONSTRAINT "Plays_timeout_team_id_fkey1" FOREIGN KEY (timeout_team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.rosters
+    ADD CONSTRAINT "Rosters_game_id_fkey" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
+
+ALTER TABLE ONLY public.rosters
+    ADD CONSTRAINT "Rosters_game_id_fkey1" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
+
+ALTER TABLE ONLY public.rosters
+    ADD CONSTRAINT "Rosters_player_id_fkey" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
+
+ALTER TABLE ONLY public.rosters
+    ADD CONSTRAINT "Rosters_player_id_fkey1" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
+
+ALTER TABLE ONLY public.rosters
+    ADD CONSTRAINT "Rosters_team_id_fkey" FOREIGN KEY (team_id) REFERENCES public.teams(team_id) NOT VALID;
+
+ALTER TABLE ONLY public.rosters
+    ADD CONSTRAINT "Rosters_team_id_fkey1" FOREIGN KEY (team_id) REFERENCES public.teams(team_id) NOT VALID;
+

@@ -239,6 +239,7 @@ def do_plays():
                                           "punt_inside_twenty", "punt_in_endzone", "punt_out_of_bounds", "punt_downed", "punt_fair_catch", "punt_blocked", \
                                          "kickoff_inside_twenty", "kickoff_in_endzone", "kickoff_out_of_bounds", "kickoff_downed", "kickoff_fair_catch", \
                                          "own_kickoff_recovery", "own_kickoff_recovery_td", "fumble_forced", "fumble_out_of_bounds", "penalty", "fumble_lost", \
+                                         "qb_hit", "sack", "touchdown", "pass_touchdown", "rush_touchdown", "return_touchdown", "two_point_attempt", "fumble", \
                                          "lateral_reception", "lateral_rush", "lateral_return", "lateral_recovery", "passing_yards", "receiving_yards", \
                                          "rushing_yards", "lateral_receiving_yards", "lateral_rushing_yards", "fumble_recovery_1_yards", "fumble_recovery_2_yards",\
                                          "return_team", "return_yards", "penalty_yards", "replay_or_challenge_result", "penalty_type", "defensive_two_point_conv", \
@@ -276,6 +277,14 @@ def do_plays():
     df_plays_current["fumble_out_of_bounds"] = df_plays_current["fumble_out_of_bounds"] == 1
     df_plays_current["penalty"] = df_plays_current["penalty"] == 1
     df_plays_current["fumble_lost"] = df_plays_current["fumble_lost"] == 1
+    df_plays_current["qb_hit"] = df_plays_current["qb_hit"] == 1
+    df_plays_current["sack"] = df_plays_current["sack"] == 1
+    df_plays_current["touchdown"] = df_plays_current["touchdown"] == 1
+    df_plays_current["pass_touchdown"] = df_plays_current["pass_touchdown"] == 1
+    df_plays_current["rush_touchdown"] = df_plays_current["rush_touchdown"] == 1
+    df_plays_current["return_touchdown"] = df_plays_current["return_touchdown"] == 1
+    df_plays_current["two_point_attempt"] = df_plays_current["two_point_attempt"] == 1
+    df_plays_current["fumble"] = df_plays_current["fumble"] == 1
     df_plays_current["lateral_reception"] = df_plays_current["lateral_reception"] == 1
     df_plays_current["lateral_rush"] = df_plays_current["lateral_rush"] == 1
     df_plays_current["lateral_return"] = df_plays_current["lateral_return"] == 1
@@ -504,13 +513,13 @@ def do_injuries():
 """# Execute All"""
 
 try:
-  do_teams()
-  do_players()
-  do_games()
+  # do_teams()
+  # do_players()
+  # do_games()
   do_plays()
   do_play_participants()
-  do_rosters()
-  do_injuries()
+  # do_rosters()
+  # do_injuries()
 except Exception as e:
   print(type(e).__name__)
   print(str(e)[:1000])   # print first 1000 chars
