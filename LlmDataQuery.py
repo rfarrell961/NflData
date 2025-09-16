@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
-from langchain import OpenAI, SQLDatabase
-from langchain.chains import SQLDatabaseSequentialChain
+import openai
 
 load_dotenv()
 
@@ -11,22 +10,25 @@ password=os.getenv('PASSWORD')
 host=os.getenv('HOST')
 port=os.getenv('PORT')
 db=os.getenv('DB')
-
+schema_file = os.getenv('SCHEMA_FILE')
 api_key = os.getenv("OPEN_AI_API_KEY")
 
-pg_uri = f'postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}'
-db = SQLDatabase.from_uri(pg_uri)
+openai.api_key = api_key
 
-llm = OpenAI(temperature=0, openai_api_key=api_key, model_name='gpt-3.5-turbo')
+schema_info = ""
+with open(schema_file, "r") as file:
+    schema_info = file.read()    
 
-PROMPT = """ 
-Given an input question, first create a syntactically correct postgresql query to run,  
-then look at the results of the query and return the answer.  
-The question: {question}
-"""
+user_question = "Get Top Rushers in the 2008 regular season"
 
-db_chain = SQLDatabaseSequentialChain(llm=llm, database=db, verbose=True, top_k=3)
+response = openai.chat.completions.create(
+    model="gpt-5-nano",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant that writes SQL queries not intended to be human readable."},
+        {"role": "user", "content": f"Given the following schema:\n{schema_info}\n{user_question}"}        
+    ],
+    temperature=1    
+)
 
-question = "What are Tua's regular season total career passing yards" 
-# use db_chain.run(question) instead if you don't have a prompt
-db_chain.run(PROMPT.format(question=question))
+sql_query = response.choices[0].message.content
+print(sql_query)

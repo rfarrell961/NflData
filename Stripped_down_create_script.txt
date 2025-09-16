@@ -1,63 +1,153 @@
-CREATE TABLE public.games (
-    game_id integer NOT NULL,
+CREATE TABLE IF NOT EXISTS public.games
+(
+    game_id integer NOT NULL DEFAULT nextval('"Games_game_id_seq"'::regclass),
     regular_season boolean,
-    away_team_id integer NOT NULL,
-    home_team_id integer NOT NULL,
+    away_team_id integer NOT NULL DEFAULT nextval('"Games_away_team_id_seq"'::regclass),
+    home_team_id integer NOT NULL DEFAULT nextval('"Games_home_team_id_seq"'::regclass),
     week integer NOT NULL,
     game_date date,
     start_time time without time zone,
-    stadium text,
+    stadium text COLLATE pg_catalog."default",
     roof boolean,
-    surface text,
-    weather text,
+    surface text COLLATE pg_catalog."default",
+    weather text COLLATE pg_catalog."default",
     wind integer,
     season integer,
     spread_line numeric(4,1),
     total_line numeric(4,1),
     division_game boolean,
     neutral_location boolean,
-    home_coach text,
-    away_coach text,
-    game_id_import text
-);
+    home_coach text COLLATE pg_catalog."default",
+    away_coach text COLLATE pg_catalog."default",
+    game_id_import text COLLATE pg_catalog."default",
+    CONSTRAINT "Games_pkey" PRIMARY KEY (game_id),
+    CONSTRAINT "Games_away_team_id_fkey" FOREIGN KEY (away_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Games_away_team_id_fkey1" FOREIGN KEY (away_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Games_home_team_id_fkey" FOREIGN KEY (home_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Games_home_team_id_fkey1" FOREIGN KEY (home_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Games_surface_check" CHECK (surface = ANY (ARRAY['a_turf'::text, 'grass'::text, 'sportturf'::text, 'fieldturf'::text, 'matrixturf'::text, 'astroturf'::text])) NOT VALID
+)
 
-CREATE TABLE public.injuries (
-    player_id integer NOT NULL,
-    team_id integer NOT NULL,
-    game_id integer NOT NULL,
-    report_primary_injury text,
-    report_secondary_injury text,
-    report_status text,
-    practice_primary_injury text,
-    practice_secondary_injury text,
-    practice_status text
-);
+CREATE TABLE IF NOT EXISTS public.injuries
+(
+    player_id integer NOT NULL DEFAULT nextval('"Injuries_player_id_seq"'::regclass),
+    team_id integer NOT NULL DEFAULT nextval('"Injuries_team_id_seq"'::regclass),
+    game_id integer NOT NULL DEFAULT nextval('"Injuries_game_id_seq"'::regclass),
+    report_primary_injury text COLLATE pg_catalog."default",
+    report_secondary_injury text COLLATE pg_catalog."default",
+    report_status text COLLATE pg_catalog."default",
+    practice_primary_injury text COLLATE pg_catalog."default",
+    practice_secondary_injury text COLLATE pg_catalog."default",
+    practice_status text COLLATE pg_catalog."default",
+    CONSTRAINT "Injuries_game_id_fkey" FOREIGN KEY (game_id)
+        REFERENCES public.games (game_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Injuries_game_id_fkey1" FOREIGN KEY (game_id)
+        REFERENCES public.games (game_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Injuries_player_id_fkey" FOREIGN KEY (player_id)
+        REFERENCES public.players (player_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Injuries_player_id_fkey1" FOREIGN KEY (player_id)
+        REFERENCES public.players (player_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Injuries_team_id_fkey" FOREIGN KEY (team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Injuries_team_id_fkey1" FOREIGN KEY (team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT injuries_practice_status_check CHECK (practice_status = ANY (ARRAY['Did Not Participate In Practice'::text, 'Limited Participation in Practice'::text, 'Full Participation in Practice'::text, 'Out (Definitely Will Not Play)'::text, 'Note'::text])) NOT VALID,
+    CONSTRAINT injuries_report_status_check CHECK (report_status = ANY (ARRAY['Out'::text, 'Questionable'::text, 'Doubtful'::text, 'Probable'::text, 'Note'::text])) NOT VALID
+)
 
+CREATE TABLE IF NOT EXISTS public.play_participants
+(
+    play_id bigint NOT NULL DEFAULT nextval('"PlayParticipants_play_id_seq"'::regclass),
+    player_id integer NOT NULL DEFAULT nextval('"PlayParticipants_player_id_seq"'::regclass),
+    role text COLLATE pg_catalog."default",
+    CONSTRAINT "PlayParticipants_play_id_fkey" FOREIGN KEY (play_id)
+        REFERENCES public.plays (play_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "PlayParticipants_play_id_fkey1" FOREIGN KEY (play_id)
+        REFERENCES public.plays (play_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "PlayParticipants_player_id_fkey" FOREIGN KEY (player_id)
+        REFERENCES public.players (player_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "PlayParticipants_player_id_fkey1" FOREIGN KEY (player_id)
+        REFERENCES public.players (player_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "PlayParticipants_role_check" CHECK (role = ANY (ARRAY['passer'::text, 'rusher'::text, 'receiver'::text, 'touchdown_scorer'::text, 'lateral_receiver'::text, 'lateral_rusher'::text, 'lateral_sack'::text, 'interception'::text, 'lateral_interception'::text, 'punt_returner'::text, 'lateral_punt_returner'::text, 'kickoff_returner'::text, 'lateral_kickoff_returner'::text, 'punter'::text, 'kicker'::text, 'own_kickoff'::text, 'blocked_kick'::text, 'tackle_for_loss_1'::text, 'tackle_for_loss_2'::text, 'qb_hit_1'::text, 'qb_hit_2'::text, 'forced_fumble_player_1'::text, 'forced_fumble_player_2'::text, 'solo_tackle_1'::text, 'solo_tackle_2'::text, 'assist_tackle_1'::text, 'assist_tackle_2'::text, 'assist_tackle_3'::text, 'assist_tackle_4'::text, 'tackle_with_assist_1'::text, 'tackle_with_assist_2'::text, 'pass_defense_1'::text, 'pass_defense_2'::text, 'fumbled_1'::text, 'fumbled_2'::text, 'fumble_recovery_1'::text, 'fumble_recovery_2'::text, 'sack'::text, 'half_sack_1'::text, 'half_sack_2'::text, 'penalty'::text, 'safety'::text])) NOT VALID
+)
 
-CREATE TABLE public.play_participants (
-    play_id bigint NOT NULL,
-    player_id integer NOT NULL,
-    role text
-);
-
-CREATE TABLE public.players (
-    player_id integer NOT NULL,
-    player_id_import character varying(10),
-    first_name text NOT NULL,
-    last_name text NOT NULL,
-    college text,
+CREATE TABLE IF NOT EXISTS public.players
+(
+    player_id integer NOT NULL DEFAULT nextval('"Players_player_id_seq"'::regclass),
+    player_id_import character varying(10) COLLATE pg_catalog."default",
+    first_name text COLLATE pg_catalog."default" NOT NULL,
+    last_name text COLLATE pg_catalog."default" NOT NULL,
+    college text COLLATE pg_catalog."default",
     date_of_birth date,
     draft_number integer,
-    draft_team_id integer,
-    rookie_year integer
-);
+    draft_team_id integer DEFAULT nextval('"Players_draft_team_id_seq"'::regclass),
+    rookie_year integer,
+    CONSTRAINT "Players_pkey" PRIMARY KEY (player_id),
+    CONSTRAINT "Players_draft_team_id_fkey" FOREIGN KEY (draft_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Players_draft_team_id_fkey1" FOREIGN KEY (draft_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+)
 
-CREATE TABLE public.plays (
-    play_id bigint NOT NULL,
+CREATE TABLE IF NOT EXISTS public.plays
+(
+    play_id bigint NOT NULL DEFAULT nextval('"Plays_play_id_seq"'::regclass),
     play_id_import integer,
-    game_id integer NOT NULL,
-    possession_team_id integer,
-    side_of_field_team_id integer,
+    game_id integer NOT NULL DEFAULT nextval('"Plays_game_id_seq"'::regclass),
+    possession_team_id integer DEFAULT nextval('"Plays_possession_team_id_seq"'::regclass),
+    side_of_field_team_id integer DEFAULT nextval('"Plays_side_of_field_team_id_seq"'::regclass),
     yardline_100 integer,
     game_seconds_remaining integer,
     quarter_end boolean,
@@ -66,26 +156,26 @@ CREATE TABLE public.plays (
     down integer,
     goal_to_go boolean,
     yards_to_go integer,
-    description text,
-    play_type text,
+    description text COLLATE pg_catalog."default",
+    play_type text COLLATE pg_catalog."default",
     yards_gained integer,
     shotgun boolean,
     no_huddle boolean,
     qb_dropback boolean,
     qb_scramble boolean,
-    pass_location text,
+    pass_location text COLLATE pg_catalog."default",
     air_yards integer,
     yards_after_catch integer,
-    run_location text,
-    run_gap text,
-    field_goal_result text,
+    run_location text COLLATE pg_catalog."default",
+    run_gap text COLLATE pg_catalog."default",
+    field_goal_result text COLLATE pg_catalog."default",
     kick_distance integer,
-    extra_point_result text,
-    two_point_conv_result text,
+    extra_point_result text COLLATE pg_catalog."default",
+    two_point_conv_result text COLLATE pg_catalog."default",
     home_timeouts_remaining integer,
     away_timeouts_remaining integer,
     timeout boolean,
-    timeout_team_id integer,
+    timeout_team_id integer DEFAULT nextval('"Plays_timeout_team_id_seq"'::regclass),
     total_home_score integer,
     total_away_score integer,
     incomplete_pass boolean,
@@ -114,16 +204,16 @@ CREATE TABLE public.plays (
     lateral_rushing_yards integer,
     fumble_recovery_1_yards integer,
     fumble_recovery_2_yards integer,
-    return_team_id integer,
+    return_team_id integer DEFAULT nextval('"Plays_return_team_id_seq"'::regclass),
     return_yards integer,
     penalty_yards integer,
-    replay_or_challenge_result text,
-    penalty_type text,
+    replay_or_challenge_result text COLLATE pg_catalog."default",
+    penalty_type text COLLATE pg_catalog."default",
     defensive_two_point_conv boolean,
     defensive_extra_point_conv boolean,
-    series_result text,
+    series_result text COLLATE pg_catalog."default",
     time_of_day time without time zone,
-    fixed_drive_result text,
+    fixed_drive_result text COLLATE pg_catalog."default",
     aborted_play boolean,
     out_of_bounds boolean,
     punt_inside_twenty boolean,
@@ -138,174 +228,117 @@ CREATE TABLE public.plays (
     kickoff_downed boolean,
     kickoff_fair_catch boolean,
     own_kickoff_recovery boolean,
-    own_kickoff_recovery_td boolean
-);
+    own_kickoff_recovery_td boolean,
+    return_touchdown boolean,
+    CONSTRAINT "Plays_pkey" PRIMARY KEY (play_id),
+    CONSTRAINT "Plays_game_id_fkey" FOREIGN KEY (game_id)
+        REFERENCES public.games (game_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_game_id_fkey1" FOREIGN KEY (game_id)
+        REFERENCES public.games (game_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_possession_team_id_fkey" FOREIGN KEY (possession_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_possession_team_id_fkey1" FOREIGN KEY (possession_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_return_team_id_fkey" FOREIGN KEY (return_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_return_team_id_fkey1" FOREIGN KEY (return_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_side_of_field_team_id_fkey" FOREIGN KEY (side_of_field_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_side_of_field_team_id_fkey1" FOREIGN KEY (side_of_field_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_timeout_team_id_fkey" FOREIGN KEY (timeout_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_timeout_team_id_fkey1" FOREIGN KEY (timeout_team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Plays_play_type_check" CHECK (play_type = ANY (ARRAY['kickoff'::text, 'run'::text, 'pass'::text, 'extra_point'::text, 'field_goal'::text, 'no_play'::text, 'qb_kneel'::text, 'punt'::text, 'qb_spike'::text])) NOT VALID,
+    CONSTRAINT "Plays_pass_location_check" CHECK (pass_location = ANY (ARRAY['left'::text, 'middle'::text, 'right'::text])) NOT VALID,
+    CONSTRAINT "Plays_run_location_check" CHECK (run_location = ANY (ARRAY['middle'::text, 'left'::text, 'right'::text])) NOT VALID,
+    CONSTRAINT "Plays_run_gap_check" CHECK (run_gap = ANY (ARRAY['guard'::text, 'end'::text, 'tackle'::text])) NOT VALID,
+    CONSTRAINT "Plays_field_goal_result_check" CHECK (field_goal_result = ANY (ARRAY['made'::text, 'missed'::text, 'blocked'::text])) NOT VALID,
+    CONSTRAINT "Plays_two_point_conv_result_check" CHECK (two_point_conv_result = ANY (ARRAY['success'::text, 'failure'::text])) NOT VALID,
+    CONSTRAINT "Plays_series_result_check" CHECK (series_result = ANY (ARRAY['First down'::text, 'Touchdown'::text, 'Turnover'::text, 'Field goal'::text, 'QB kneel'::text, 'Punt'::text, 'Turnover on downs'::text, 'Missed field goal'::text, 'End of half'::text, 'Opp touchdown'::text, 'Safety'::text])) NOT VALID,
+    CONSTRAINT "Plays_fixed_drive_result_check" CHECK (fixed_drive_result = ANY (ARRAY['Touchdown'::text, 'Turnover'::text, 'Field goal'::text, 'End of half'::text, 'Punt'::text, 'Turnover on downs'::text, 'Missed field goal'::text, 'Opp touchdown'::text, 'Safety'::text])) NOT VALID,
+    CONSTRAINT plays_extra_point_result_check CHECK (extra_point_result = ANY (ARRAY['good'::text, 'failed'::text, 'aborted'::text, 'blocked'::text])) NOT VALID,
+    CONSTRAINT plays_replay_or_challenge_result_check CHECK (replay_or_challenge_result = ANY (ARRAY['reversed'::text, 'upheld'::text, 'denied'::text])) NOT VALID
+)
 
-CREATE TABLE public.rosters (
-    player_id integer NOT NULL,
-    team_id integer NOT NULL,
+CREATE TABLE IF NOT EXISTS public.rosters
+(
+    player_id integer NOT NULL DEFAULT nextval('"Rosters_player_id_seq"'::regclass),
+    team_id integer NOT NULL DEFAULT nextval('"Rosters_team_id_seq"'::regclass),
     height integer,
     weight integer,
-    game_id integer NOT NULL,
+    game_id integer NOT NULL DEFAULT nextval('"Rosters_game_id_seq"'::regclass),
     jersey_number integer,
-    "position" text
-);
-CREATE TABLE public.teams (
-    team_id integer NOT NULL,
-    abbreviation character varying(3),
-    season integer NOT NULL
-);
+    "position" text COLLATE pg_catalog."default",
+    CONSTRAINT "Rosters_game_id_fkey" FOREIGN KEY (game_id)
+        REFERENCES public.games (game_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Rosters_game_id_fkey1" FOREIGN KEY (game_id)
+        REFERENCES public.games (game_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Rosters_player_id_fkey" FOREIGN KEY (player_id)
+        REFERENCES public.players (player_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Rosters_player_id_fkey1" FOREIGN KEY (player_id)
+        REFERENCES public.players (player_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Rosters_team_id_fkey" FOREIGN KEY (team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT "Rosters_team_id_fkey1" FOREIGN KEY (team_id)
+        REFERENCES public.teams (team_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT rosters_position_check CHECK ("position" = ANY (ARRAY['RB'::text, 'CB'::text, 'G'::text, 'T'::text, 'DT'::text, 'DE'::text, 'K'::text, 'SS'::text, 'C'::text, 'FS'::text, 'WR'::text, 'TE'::text, 'FB'::text, 'OLB'::text, 'QB'::text, 'P'::text, 'MLB'::text, 'NT'::text, 'ILB'::text, 'LB'::text, 'DB'::text, 'S'::text, 'LS'::text, 'KR'::text, 'PR'::text, 'OL'::text, 'DL'::text])) NOT VALID
+)
 
-ALTER TABLE ONLY public.games
-    ADD CONSTRAINT "Games_pkey" PRIMARY KEY (game_id);
-
-ALTER TABLE public.games
-    ADD CONSTRAINT "Games_surface_check" CHECK ((surface = ANY (ARRAY['a_turf'::text, 'grass'::text, 'sportturf'::text, 'fieldturf'::text, 'matrixturf'::text, 'astroturf'::text]))) NOT VALID;
-
-ALTER TABLE public.play_participants
-    ADD CONSTRAINT "PlayParticipants_role_check" CHECK ((role = ANY (ARRAY['passer'::text, 'rusher'::text, 'receiver'::text, 'touchdown_scorer'::text, 'lateral_receiver'::text, 'lateral_rusher'::text, 'lateral_sack'::text, 'interception'::text, 'lateral_interception'::text, 'punt_returner'::text, 'lateral_punt_returner'::text, 'kickoff_returner'::text, 'lateral_kickoff_returner'::text, 'punter'::text, 'kicker'::text, 'own_kickoff'::text, 'blocked_kick'::text, 'tackle_for_loss_1'::text, 'tackle_for_loss_2'::text, 'qb_hit_1'::text, 'qb_hit_2'::text, 'forced_fumble_player_1'::text, 'forced_fumble_player_2'::text, 'solo_tackle_1'::text, 'solo_tackle_2'::text, 'assist_tackle_1'::text, 'assist_tackle_2'::text, 'assist_tackle_3'::text, 'assist_tackle_4'::text, 'tackle_with_assist_1'::text, 'tackle_with_assist_2'::text, 'pass_defense_1'::text, 'pass_defense_2'::text, 'fumbled_1'::text, 'fumbled_2'::text, 'fumble_recovery_1'::text, 'fumble_recovery_2'::text, 'sack'::text, 'half_sack_1'::text, 'half_sack_2'::text, 'penalty'::text, 'safety'::text]))) NOT VALID;
-
-ALTER TABLE ONLY public.players
-    ADD CONSTRAINT "Players_pkey" PRIMARY KEY (player_id);
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT "Plays_field_goal_result_check" CHECK ((field_goal_result = ANY (ARRAY['made'::text, 'missed'::text, 'blocked'::text]))) NOT VALID;
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT "Plays_fixed_drive_result_check" CHECK ((fixed_drive_result = ANY (ARRAY['Touchdown'::text, 'Turnover'::text, 'Field goal'::text, 'End of half'::text, 'Punt'::text, 'Turnover on downs'::text, 'Missed field goal'::text, 'Opp touchdown'::text, 'Safety'::text]))) NOT VALID;
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT "Plays_pass_location_check" CHECK ((pass_location = ANY (ARRAY['left'::text, 'middle'::text, 'right'::text]))) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_pkey" PRIMARY KEY (play_id);
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT "Plays_play_type_check" CHECK ((play_type = ANY (ARRAY['kickoff'::text, 'run'::text, 'pass'::text, 'extra_point'::text, 'field_goal'::text, 'no_play'::text, 'qb_kneel'::text, 'punt'::text, 'qb_spike'::text]))) NOT VALID;
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT "Plays_run_gap_check" CHECK ((run_gap = ANY (ARRAY['guard'::text, 'end'::text, 'tackle'::text]))) NOT VALID;
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT "Plays_run_location_check" CHECK ((run_location = ANY (ARRAY['middle'::text, 'left'::text, 'right'::text]))) NOT VALID;
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT "Plays_series_result_check" CHECK ((series_result = ANY (ARRAY['First down'::text, 'Touchdown'::text, 'Turnover'::text, 'Field goal'::text, 'QB kneel'::text, 'Punt'::text, 'Turnover on downs'::text, 'Missed field goal'::text, 'End of half'::text, 'Opp touchdown'::text, 'Safety'::text]))) NOT VALID;
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT "Plays_two_point_conv_result_check" CHECK ((two_point_conv_result = ANY (ARRAY['success'::text, 'failure'::text]))) NOT VALID;
-
-ALTER TABLE ONLY public.teams
-    ADD CONSTRAINT "Teams_pkey" PRIMARY KEY (team_id);
-
-ALTER TABLE public.injuries
-    ADD CONSTRAINT injuries_practice_status_check CHECK ((practice_status = ANY (ARRAY['Did Not Participate In Practice'::text, 'Limited Participation in Practice'::text, 'Full Participation in Practice'::text, 'Out (Definitely Will Not Play)'::text, 'Note'::text]))) NOT VALID;
-
-ALTER TABLE public.injuries
-    ADD CONSTRAINT injuries_report_status_check CHECK ((report_status = ANY (ARRAY['Out'::text, 'Questionable'::text, 'Doubtful'::text, 'Probable'::text, 'Note'::text]))) NOT VALID;
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT plays_extra_point_result_check CHECK ((extra_point_result = ANY (ARRAY['good'::text, 'failed'::text, 'aborted'::text, 'blocked'::text]))) NOT VALID;
-
-ALTER TABLE public.plays
-    ADD CONSTRAINT plays_replay_or_challenge_result_check CHECK ((replay_or_challenge_result = ANY (ARRAY['reversed'::text, 'upheld'::text, 'denied'::text]))) NOT VALID;
-
-ALTER TABLE public.rosters
-    ADD CONSTRAINT rosters_position_check CHECK (("position" = ANY (ARRAY['RB'::text, 'CB'::text, 'G'::text, 'T'::text, 'DT'::text, 'DE'::text, 'K'::text, 'SS'::text, 'C'::text, 'FS'::text, 'WR'::text, 'TE'::text, 'FB'::text, 'OLB'::text, 'QB'::text, 'P'::text, 'MLB'::text, 'NT'::text, 'ILB'::text, 'LB'::text, 'DB'::text, 'S'::text, 'LS'::text, 'KR'::text, 'PR'::text, 'OL'::text, 'DL'::text]))) NOT VALID;
-
-ALTER TABLE ONLY public.games
-    ADD CONSTRAINT "Games_away_team_id_fkey" FOREIGN KEY (away_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.games
-    ADD CONSTRAINT "Games_away_team_id_fkey1" FOREIGN KEY (away_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.games
-    ADD CONSTRAINT "Games_home_team_id_fkey" FOREIGN KEY (home_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.games
-    ADD CONSTRAINT "Games_home_team_id_fkey1" FOREIGN KEY (home_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.injuries
-    ADD CONSTRAINT "Injuries_game_id_fkey" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
-
-ALTER TABLE ONLY public.injuries
-    ADD CONSTRAINT "Injuries_game_id_fkey1" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
-
-ALTER TABLE ONLY public.injuries
-    ADD CONSTRAINT "Injuries_player_id_fkey" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
-
-ALTER TABLE ONLY public.injuries
-    ADD CONSTRAINT "Injuries_player_id_fkey1" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
-
-ALTER TABLE ONLY public.injuries
-    ADD CONSTRAINT "Injuries_team_id_fkey" FOREIGN KEY (team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.injuries
-    ADD CONSTRAINT "Injuries_team_id_fkey1" FOREIGN KEY (team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.play_participants
-    ADD CONSTRAINT "PlayParticipants_play_id_fkey" FOREIGN KEY (play_id) REFERENCES public.plays(play_id) NOT VALID;
-
-ALTER TABLE ONLY public.play_participants
-    ADD CONSTRAINT "PlayParticipants_play_id_fkey1" FOREIGN KEY (play_id) REFERENCES public.plays(play_id) NOT VALID;
-
-ALTER TABLE ONLY public.play_participants
-    ADD CONSTRAINT "PlayParticipants_player_id_fkey" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
-
-ALTER TABLE ONLY public.play_participants
-    ADD CONSTRAINT "PlayParticipants_player_id_fkey1" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
-
-ALTER TABLE ONLY public.players
-    ADD CONSTRAINT "Players_draft_team_id_fkey" FOREIGN KEY (draft_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.players
-    ADD CONSTRAINT "Players_draft_team_id_fkey1" FOREIGN KEY (draft_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_game_id_fkey" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_game_id_fkey1" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_possession_team_id_fkey" FOREIGN KEY (possession_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_possession_team_id_fkey1" FOREIGN KEY (possession_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_return_team_id_fkey" FOREIGN KEY (return_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_return_team_id_fkey1" FOREIGN KEY (return_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_side_of_field_team_id_fkey" FOREIGN KEY (side_of_field_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_side_of_field_team_id_fkey1" FOREIGN KEY (side_of_field_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_timeout_team_id_fkey" FOREIGN KEY (timeout_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.plays
-    ADD CONSTRAINT "Plays_timeout_team_id_fkey1" FOREIGN KEY (timeout_team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.rosters
-    ADD CONSTRAINT "Rosters_game_id_fkey" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
-
-ALTER TABLE ONLY public.rosters
-    ADD CONSTRAINT "Rosters_game_id_fkey1" FOREIGN KEY (game_id) REFERENCES public.games(game_id) NOT VALID;
-
-ALTER TABLE ONLY public.rosters
-    ADD CONSTRAINT "Rosters_player_id_fkey" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
-
-ALTER TABLE ONLY public.rosters
-    ADD CONSTRAINT "Rosters_player_id_fkey1" FOREIGN KEY (player_id) REFERENCES public.players(player_id) NOT VALID;
-
-ALTER TABLE ONLY public.rosters
-    ADD CONSTRAINT "Rosters_team_id_fkey" FOREIGN KEY (team_id) REFERENCES public.teams(team_id) NOT VALID;
-
-ALTER TABLE ONLY public.rosters
-    ADD CONSTRAINT "Rosters_team_id_fkey1" FOREIGN KEY (team_id) REFERENCES public.teams(team_id) NOT VALID;
-
+CREATE TABLE IF NOT EXISTS public.teams
+(
+    team_id integer NOT NULL DEFAULT nextval('"Teams_team_id_seq"'::regclass),
+    abbreviation character varying(3) COLLATE pg_catalog."default",
+    season integer NOT NULL,
+    CONSTRAINT "Teams_pkey" PRIMARY KEY (team_id)
+)
