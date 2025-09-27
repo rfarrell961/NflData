@@ -2,6 +2,8 @@
 Scripts associated with my local NFL play-by-play database 
 
 ## ENV Variables
+DEBUG
+
 START_YEAR_ROSTER\
 START_YEAR_INJURY\
 START_YEAR_PLAY\
