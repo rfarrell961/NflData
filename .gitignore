@@ -1,2 +1,33 @@
 *.env
 data/
+
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# Visual Studio
+.vs/
+
+# Rider
+.idea/
+
+# Secrets / config
+appsettings.Development.json
+*.local
+.env
+
+# Logs
+*.log
+
+# NuGet
+*.nupkg
+packages/
