@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using WebAppApi.Interfaces;
 
 namespace WebAppApi.Controllers
@@ -9,14 +10,14 @@ namespace WebAppApi.Controllers
     public class QueryController : ControllerBase
     {
         [HttpPost]
-        public ActionResult<string> Post(ILlmService llmService, string value)
+        public async Task<ActionResult<string>> Post(ILlmService llmService, string value)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
                 return BadRequest("Value cannot be null or empty.");
             }
 
-            string retval = llmService.QueryToSql(value);
+            string retval = await llmService.QueryToSql(value);
 
             // For demonstration, just return the received value in uppercase
             return Ok(retval);

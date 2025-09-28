@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 import openai
 
-load_dotenv()
+load_dotenv("./.env")
 
 user=os.getenv('USER')
 password=os.getenv('PASSWORD')

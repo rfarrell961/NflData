@@ -1,5 +1,6 @@
 using DotNetEnv;
 using OpenAI;
+using OpenAI.Chat;
 using WebAppApi.Interfaces;
 using WebAppApi.Services;
 
@@ -14,21 +15,31 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-string llmProvider = builder.Configuration["LlmProvider"];
-if (string.IsNullOrEmpty(llmProvider))
+// Register LlmContextOptions
+
+var schemaFile = Environment.GetEnvironmentVariable("SCHEMA_FILE");
+if (string.IsNullOrEmpty(schemaFile) || !File.Exists(schemaFile))
+    throw new Exception("SCHEMA_FILE is missing or invalid");
+
+builder.Services.AddSingleton(new LlmContextOptions
 {
-    throw new Exception("No LLM Provider selected");
-}
+    DatabaseContext = System.IO.File.ReadAllText(schemaFile),
+});
+
+string llmProvider = builder.Configuration["LlmProvider"];
 
 // Register OpenAIClient only if needed
 if (llmProvider.ToUpper() == "OPENAI")
 {
     builder.Services.AddSingleton(sp =>
     {
-        var apiKey = Environment.GetEnvironmentVariable("OPEN_AI_API_KEY");
-        if (string.IsNullOrEmpty(apiKey))
-            throw new Exception("OPEN_AI_API_KEY not set");
-        return new OpenAIClient(apiKey);
+        var apiKey = Environment.GetEnvironmentVariable("OPEN_AI_API_KEY")
+            ??throw new Exception("OPEN_AI_API_KEY not set");
+
+        var model = Environment.GetEnvironmentVariable("MODEL")
+            ?? throw new Exception("MODEL not set");
+
+        return new ChatClient(model, apiKey);
     });
 }
 
@@ -38,7 +49,7 @@ builder.Services.AddScoped<ILlmService>(sp =>
 {
     return llmProvider.ToUpper() switch
     {
-        "OPENAI" => new OpenAIService(sp.GetRequiredService<OpenAIClient>()),
+        "OPENAI" => new OpenAIService(sp.GetRequiredService<ChatClient>(), sp.GetRequiredService<LlmContextOptions>()),
         _ => throw new Exception($"LLM Provider {llmProvider} not supported")
     };
 });

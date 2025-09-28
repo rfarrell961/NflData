@@ -1,28 +1,33 @@
 ﻿using WebAppApi.Interfaces;
 using OpenAI;
+using OpenAI.Chat;
+using System.ClientModel;
+using System.Threading.Tasks;
 
 namespace WebAppApi.Services
 {
     public class OpenAIService : ILlmService
     {
-        private OpenAIClient _client;
+        private ChatClient _client;
+        private LlmContextOptions _context;        
 
-        public string DatabaseContext { get; set; }
-        public string Model { get; set; }
-
-        public OpenAIService(OpenAIClient client)
+        public OpenAIService(ChatClient client, LlmContextOptions context)
         {            
             _client = client;
+            _context = context;
         }
 
-        public string QueryToSql(string query)
+        public async Task<string> QueryToSql(string query)
         {
-            //_client.GetChatClient(Model);
+            ChatCompletion completion = _client.CompleteChat(
+                new SystemChatMessage("You are a helpful assistant that writes SQL queries not intended to be human readable."),
+                new UserChatMessage("Given the following schema:\n" + _context.DatabaseContext + "\n" + query)
+            );
 
-            return query + "TestingTesting123";
+            return completion.Content[0].Text;
         }
 
-        public string ResponseToAnswer(string response)
+        public Task<string> ResponseToAnswer(string response)
         {
             throw new NotImplementedException();
         }

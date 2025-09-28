@@ -1,9 +1,8 @@
 ﻿namespace WebAppApi.Interfaces
 {
     public interface ILlmService
-    {
-        public string DatabaseContext { get; set; } 
-        public string QueryToSql(string query);
-        public string ResponseToAnswer(string response);
+    {        
+        public Task<string> QueryToSql(string query);
+        public Task<string> ResponseToAnswer(string response);
     }
 }
