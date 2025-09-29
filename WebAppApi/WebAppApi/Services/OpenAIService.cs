@@ -27,9 +27,14 @@ namespace WebAppApi.Services
             return completion.Content[0].Text;
         }
 
-        public Task<string> ResponseToAnswer(string response)
+        public async Task<string> ResponseToAnswer(string response, string query)
         {
-            throw new NotImplementedException();
+            ChatCompletion completion = _client.CompleteChat(
+                new SystemChatMessage("You are a helpful assistant that turns sql responses into human readable answers"),
+                new UserChatMessage("Given the following query: " + query + "\nConvert the following response: " + response)
+            );
+
+            return completion.Content[0].Text;
         }
     }
 }

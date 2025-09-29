@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Data;
 using System.Threading.Tasks;
 using WebAppApi.Interfaces;
+using WebAppApi.Services;
 
 namespace WebAppApi.Controllers
 {
@@ -9,18 +12,30 @@ namespace WebAppApi.Controllers
     [ApiController]
     public class QueryController : ControllerBase
     {
-        [HttpPost]
-        public async Task<ActionResult<string>> Post(ILlmService llmService, string value)
+        private ILlmService _llmService;
+        private DatabaseService _dbService;
+
+        public QueryController(ILlmService llmService, DatabaseService dbService)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            _llmService = llmService;
+            _dbService = dbService;
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult<string>> Post(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
             {
                 return BadRequest("Value cannot be null or empty.");
             }
 
-            string retval = await llmService.QueryToSql(value);
+            string retval = await _llmService.QueryToSql(query);
+            DataTable queryResult = await _dbService.ExecuteQueryAsync(retval);
+            string result = JsonConvert.SerializeObject(queryResult);
+            string humanReadableResponse = await _llmService.ResponseToAnswer(result, query);
 
-            // For demonstration, just return the received value in uppercase
-            return Ok(retval);
+            return Ok(humanReadableResponse);
         } 
     }
 }

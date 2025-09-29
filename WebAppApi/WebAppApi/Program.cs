@@ -3,6 +3,7 @@ using OpenAI;
 using OpenAI.Chat;
 using WebAppApi.Interfaces;
 using WebAppApi.Services;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,32 @@ builder.Services.AddScoped<ILlmService>(sp =>
     };
 });
 
+// Register NpgsqlDataSource
+string host = Environment.GetEnvironmentVariable("HOST") 
+    ?? throw new Exception("HOST not set");
+
+string port = Environment.GetEnvironmentVariable("PORT") 
+    ?? throw new Exception("PORT not set");
+
+string username = Environment.GetEnvironmentVariable("USER") 
+    ?? throw new Exception("USER not set");
+
+string password = Environment.GetEnvironmentVariable("PASSWORD") 
+    ?? throw new Exception("PASSWORD not set");
+
+string database = Environment.GetEnvironmentVariable("DB") 
+    ?? throw new Exception("DB not set");
+
+string connectionString = "Host=" + host 
+    + ";Port=" + port 
+    + ";Username=" + username 
+    + ";Password=" + password 
+    + ";Database=" + database;
+
+NpgsqlDataSource dataSource = NpgsqlDataSource.Create(connectionString);
+builder.Services.AddSingleton(dataSource);
+
+builder.Services.AddScoped<DatabaseService>();
 
 var app = builder.Build();
 
