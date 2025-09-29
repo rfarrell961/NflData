@@ -1,33 +1,43 @@
-*.env
+# Environment / secrets
+.env
+*.local
+appsettings.Development.json
+
+# Data
 data/
 
+# Build output
 bin/
 obj/
 out/
+dist/
+dist-ssr/
 
-# User-specific files
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-
-# VS Code
-.vscode/
-
-# Visual Studio
-.vs/
-
-# Rider
-.idea/
-
-# Secrets / config
-appsettings.Development.json
-*.local
-.env
+# Packages
+node_modules/
+packages/
+*.nupkg
 
 # Logs
 *.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# NuGet
-*.nupkg
-packages/
+# IDEs / Editors
+.vscode/
+!.vscode/extensions.json
+.idea/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
