@@ -1,5 +1,5 @@
 # NflData
-Scripts associated with my local NFL play-by-play database 
+Scripts, API, and Frontend associated with NFL play-by-play database 
 
 ## ENV Variables
 DEBUG
