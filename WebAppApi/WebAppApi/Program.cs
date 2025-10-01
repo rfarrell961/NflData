@@ -9,6 +9,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load(builder.Configuration["EnvPath"]);
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllLocalhost", policy =>
+    {
+        policy
+            .SetIsOriginAllowed(origin =>
+                origin.StartsWith("http://localhost") || origin.StartsWith("https://localhost"))
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -94,6 +107,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors("AllowAllLocalhost");
 
 app.MapControllers();
 

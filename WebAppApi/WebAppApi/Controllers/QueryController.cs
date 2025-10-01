@@ -23,7 +23,7 @@ namespace WebAppApi.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<string>> Post(string query)
+        public async Task<ActionResult<string>> Post([FromBody]string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
