@@ -10,6 +10,7 @@ function MainScreen()
     const SendRequest = async () => {
         setLoading(true)
         setError(null)
+        setResponse("")
         try
         {
             const response = await fetch("https://localhost:7173/api/Query", {
@@ -21,8 +22,8 @@ function MainScreen()
             })
 
             if (!response.ok) throw new Error ("Network Error")
-            const json = await response.json()
-            console.log(json)
+            const result = await response.text()
+            setResponse(result)
         }
         catch(err)
         {
@@ -40,12 +41,24 @@ function MainScreen()
             <p>
                 {response}
             </p>
-            <input 
-                value={userInput} 
-                onChange={e => setUserInput(e.target.value)}
-            />
+            <div style={{ width: "100%" }}>
+                <input 
+                    style={{
+                        width: "calc(100% - 32px)", // full width minus left/right margins
+                        margin: "0 16px",           // 16px margin on left/right
+                        boxSizing: "border-box",    // ensures padding/border don’t break layout
+                    }}
+                    placeholder="Type here..."
+                    value={userInput} 
+                    onChange={e => setUserInput(e.target.value)}
+                />
+            </div>
+            
             {loading && <p>loading...</p>}
-            <div>
+            <div style={{
+                margin: "20px 0"
+            }}
+            >
                 <button onClick={SendRequest}>
                     Enter
                 </button>
